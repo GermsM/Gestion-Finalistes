@@ -1,0 +1,224 @@
+<!DOCTYPE html>  
+<html lang="fr">  
+<head>  
+    <meta charset="UTF-8">  
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">  
+    <title>Uploader un Fichier Excel</title>  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>  
+    <style>  
+        body { font-family: Arial, sans-serif; margin: 20px; }  
+        #result { margin-top: 20px; }  
+        table { border-collapse: collapse; width: 100%; margin-top: 10px; }  
+        th, td { border: 1px solid #ddd; padding: 8px; }  
+        th { background-color: #f2f2f2; text-align: left; }  
+    </style>  
+</head>  
+<body>  
+    <h1>Vérification Doublons - Gestion Finalistes</h1>  
+    <input type="file" id="fileInput" accept=".xlsx" />  
+    <button id="uploadButton">Vérification Doublons</button>  
+    <button id="downloadButton" style="display:none;">Télécharger les Résultats</button>  
+    <div id="result"></div>  
+
+    <script>  
+        let reportData = []; // Pour stocker les données des résultats  
+        
+        // Fonction pour formater la date  
+        function formatDate(dateValue) {  
+            if (!dateValue) return '';  
+            const date = new Date(dateValue);  
+            const day = String(date.getDate()).padStart(2, '0');  
+            const month = String(date.getMonth() + 1).padStart(2, '0'); // Les mois sont indexés à partir de 0  
+            const year = date.getFullYear();  
+            return `${day}/${month}/${year}`;  
+        }  
+
+        document.getElementById('uploadButton').onclick = () => {  
+            const input = document.getElementById('fileInput');  
+            const file = input.files[0];  
+
+            if (!file) {  
+                alert("Veuillez sélectionner un fichier Excel.");  
+                return;  
+            }  
+
+            const reader = new FileReader();  
+            reader.onload = (e) => {  
+                const data = new Uint8Array(e.target.result);  
+                const workbook = XLSX.read(data, { type: "array" });  
+                const duplicates = {};  
+                let currentProvinceEduc = '';  
+                let currentPool = '';  
+                let currentCentre = '';  
+                let currentEtablissement = '';  
+                let currentOption = ''; // Variable pour l'option  
+
+                workbook.SheetNames.forEach(sheetName => {  
+                    const sheet = workbook.Sheets[sheetName];  
+                    const sheetData = XLSX.utils.sheet_to_json(sheet, { header: 1 });  
+
+                    // Processer les lignes pour extraire province, pool, centre, établissement et option  
+                    for (let rowIndex = 0; rowIndex < sheetData.length; rowIndex++) {  
+                        const row = sheetData[rowIndex];  
+
+                        // Vérifier et assigner provinceEduc, pool, centre, établissement et option  
+                        if (row[0] === "PROVINCE EDUC." && row[2]) {  
+                            currentProvinceEduc = row[2];  
+                        } else if (row[0] === "POOL" && row[2]) {  
+                            currentPool = row[2];  
+                        } else if (row[0] === "CENTRE" && row[2]) {  
+                            currentCentre = row[2];  
+                        } else if (row[0] === "ETABLISSEMENT" && row[2]) {  
+                            currentEtablissement = row[2];  
+                        } else if (row[0] === "OPTION" && row[2]) { // Ajouter la gestion de l'option  
+                            currentOption = row[2];  
+                        }  
+                    }  
+
+                    // Traiter le tableau d'étudiants à partir de la ligne appropriée  
+                    for (let rowIndex = 10; rowIndex < sheetData.length; rowIndex++) {  
+                        const row = sheetData[rowIndex];  
+
+                        if (row.length < 6) continue; // Assurer que la ligne est de longueur suffisante  
+
+                        const name = row[2]; // Colonne "Noms, Postnoms et Prénoms"  
+                        const placeOfBirth = row[3]; // Lieu de Naissance  
+                        let birthDate; // Initialiser la variable de date de naissance  
+                        const sex = row[5]; // Sexe  
+
+                        // Gestion correcte de la date de naissance  
+                        if (typeof row[4] === "number") {  
+                            // Convertir le numéro de date Excel en date JavaScript  
+                            birthDate = new Date((row[4] - 25569) * 86400 * 1000); // 25569 est le nombre de jours depuis 1970-01-01 à 1900-01-01  
+                        } else if (typeof row[4] === "string") {  
+                            // Si c'est une chaîne, juste la convertir en Date  
+                            birthDate = new Date(row[4]);  
+                        } else {  
+                            birthDate = null; // Gérer le format inattendu  
+                        }  
+
+                        if (name) {  
+                            const key = name.trim().toLowerCase();  
+
+                            // Initialiser l'entrée si elle n'existe pas encore  
+                            if (!duplicates[key]) {  
+                                duplicates[key] = {  
+                                    name: name,  
+                                    count: 0, // Compteur des répétitions  
+                                    instances: [], // Stocker les instances pour agrégation  
+                                    provinceEduc: currentProvinceEduc,  
+                                };  
+                            }  
+
+                            // Incrémenter le compteur et ajouter l'instance  
+                            duplicates[key].count++;  
+                            duplicates[key].instances.push({  
+                                placeOfBirth: placeOfBirth,  
+                                birthDate: birthDate,  
+                                sex: sex,  
+                                pool: currentPool,  
+                                centre: currentCentre,  
+                                etablissement: currentEtablissement,  
+                                option: currentOption // Ajouter l'option à l'instance  
+                            });  
+                        }  
+                    }  
+                });  
+
+                // Formatage des résultats : ne garder que les doublons  
+                reportData = [];  
+                for (const key in duplicates) {  
+                    if (duplicates[key].count > 1) { // Vérifier les occurrences  
+                        const { name, count, instances, provinceEduc } = duplicates[key];  
+
+                        // Agréger les informations  
+                        const pools = Array.from(new Set(instances.map(inst => inst.pool))).join(', ');  
+                        const centres = Array.from(new Set(instances.map(inst => inst.centre))).join(', ');  
+                        const etablissements = Array.from(new Set(instances.map(inst => inst.etablissement))).join(', ');  
+                        const options = Array.from(new Set(instances.map(inst => inst.option))).join(', '); // Agrégation des options  
+                        
+                        // Prendre la première occurrence de chaque instance pour afficher la date  
+                        reportData.push({  
+                            name: name,  
+                            count: count,  
+                            placeOfBirth: instances[0].placeOfBirth,  
+                            birthDate: formatDate(instances[0].birthDate), // Formater la date  
+                            sex: instances[0].sex,  
+                            provinceEduc: provinceEduc,  
+                            pool: pools,  
+                            centre: centres,  
+                            etablissement: etablissements,  
+                            option: options // Afficher les options agrégées  
+                        });  
+                    }  
+                }  
+
+                showResults(reportData);  
+
+                // Afficher le bouton de téléchargement si des résultats sont trouvés  
+                document.getElementById('downloadButton').style.display = reportData.length > 0 ? 'block' : 'none';  
+            };  
+
+            // Lire le fichier en tant qu'array buffer  
+            reader.readAsArrayBuffer(file);  
+        };  
+
+        // Fonction pour afficher les résultats  
+        function showResults(reportData) {  
+            const resultDiv = document.getElementById('result');  
+            resultDiv.innerHTML = '';  
+
+            if (reportData.length === 0) {  
+                resultDiv.innerHTML = '<p>Aucun doublon trouvé.</p>';  
+                return;  
+            }  
+
+            const table = document.createElement('table');  
+            const header = table.createTHead();  
+            const headerRow = header.insertRow();  
+            ['Noms', 'Nombre de Répétitions', 'Lieu de Naissance', 'Date de Naiss.', 'Sexe', 'Province Educ.', 'Pool', 'Centre', 'Établissement', 'Option'].forEach(text => {  
+                const cell = headerRow.insertCell();  
+                cell.textContent = text;  
+            });  
+
+            const body = table.createTBody();  
+            reportData.forEach(dup => {  
+                const row = body.insertRow();  
+                row.insertCell().textContent = dup.name;  
+                row.insertCell().textContent = dup.count; // Montre combien de fois le nom est répété  
+                row.insertCell().textContent = dup.placeOfBirth;  
+                row.insertCell().textContent = dup.birthDate; // Affiche la date formatée  
+                row.insertCell().textContent = dup.sex;  
+                row.insertCell().textContent = dup.provinceEduc;  
+                row.insertCell().textContent = dup.pool; // Affiche le pool  
+                row.insertCell().textContent = dup.centre; // Affiche le centre  
+                row.insertCell().textContent = dup.etablissement; // Affiche les établissements  
+                row.insertCell().textContent = dup.option; // Affiche les options  
+            });  
+
+            resultDiv.appendChild(table);  
+        }  
+
+        // Fonction pour télécharger les résultats  
+        document.getElementById('downloadButton').onclick = () => {  
+            const ws = XLSX.utils.json_to_sheet(reportData.map(dup => ({  
+                'Nom': dup.name,  
+                'Nombre de Répétitions': dup.count,  
+                'Lieu de Naissance': dup.placeOfBirth,  
+                'Date de Naiss.': dup.birthDate, // Utiliser la date formatée  
+                'Sexe': dup.sex,  
+                'Province Educ.': dup.provinceEduc,  
+                'Pool': dup.pool,  
+                'Centre': dup.centre,  
+                'Établissement': dup.etablissement,  
+                'Option': dup.option, // Inclure l'option  
+            })));  
+
+            const wb = XLSX.utils.book_new();  
+            XLSX.utils.book_append_sheet(wb, ws, "Résultats");  
+
+            XLSX.writeFile(wb, "Résultats Doublons.xlsx");  
+        };  
+    </script>  
+</body>  
+</html>

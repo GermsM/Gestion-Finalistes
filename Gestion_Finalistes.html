@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Accueil - Gestion Finalistes</title>
+    <link rel="stylesheet" href="system files/stylesheet.css">
+    <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css">
+    <link rel="icon" href="favicon2.ico">
+</head>
+
+<body id="payment">
+	<header>
+		<div class="logo">
+			<p>Gestion Finalistes |<span>| Inspection BARAKA</span></p>
+		</div>
+        <ul class="mebar">
+			<li class="active"><a href="system files/Gestion_Finalistes.html">Accueil</a></li>
+      <li><a href="system files/load9.html">Enregistrement Finaliste</a></li>
+			<li><a href="system files/load19.html">Enregistrement Elève</a></li>
+      <li><a href="system files/load23.html">Infos</a></li>
+		</ul>
+	</header>
+    <br>
+
+    <div class="wrapper">
+        <h2>BIENVENUE SUR LA PLATEFORME</h2>
+        <form>
+            <!--Account Information Start-->
+            <br>
+            <br>
+            <div>
+                <p class="flagged">1. Procéder à l'enregistrement Finaliste.</p> 
+            </div>     
+            <div class="input_group">
+                <div class="input_box3">
+                    <button type="button" onclick="redirectToPage()">FINALISTE</button>
+                </div>
+            </div>
+            <br>
+            <br>
+            <div>
+                <p class="flagged">2. Procéder à l'enregistrement Elève.</p> 
+             </div>   
+              <div class="input_group">
+                  <div class="input_box3">
+                    <button type="button" onclick="redirectToPage1()"> ELEVE </button>                    
+                  </div>
+             </div>
+            <br>
+            <br>
+            <div>
+                <p class="flagged">3. Voir toutes les données Finalistes et Elèves.</p> 
+             </div>   
+              <div class="input_group">
+                  <div class="input_box3">
+                    <button type="button" onclick="redirectToPage2()">INFORMATIONS</button>                    
+                  </div>
+                </div>
+            <div>
+            <br>
+            <br>
+            <div>
+                <p class="flagged">4. Procéder à la vérification des données en doublons.</p> 
+             </div>   
+              <div class="input_group">
+                  <div class="input_box3">
+                    <button type="button" onclick="redirectToPage3()">VERIFICATION DOUBLONS</button>                    
+                  </div>
+                </div>
+                <p class</p> 
+                    <br>
+                </div>         
+        </form>
+    </div>  
+    <script>
+        function redirectToPage() {
+            window.location.href = "system files/load9.html";  
+        }
+    </script>
+    <script>
+        function redirectToPage1() {
+            window.location.href = "system files/load19.html";  
+        }
+    </script>
+    <script>
+        function redirectToPage2() {
+            window.location.href = "system files/load23.html";  
+        }
+    </script>
+    <script>
+        function redirectToPage3() {
+            window.location.href = "system files/load2.html";  
+        }
+    </script>
+
+</html>

@@ -1,0 +1,115 @@
+<!DOCTYPE html>  
+<html lang="en">  
+
+<head>  
+    <meta charset="UTF-8">  
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">  
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">  
+    <title>Informations : Finalistes et Élèves - Gestion Finalistes</title>  
+    <link rel="stylesheet" href="stylesheet.css">  
+    <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css">  
+    <link rel="icon" href="favicon2.ico">  
+</head>  
+
+<body id="payment">  
+    <header>  
+        <div class="logo">  
+            <p>Gestion Finalistes |<span>| Inspection BARAKA</span></p>  
+        </div>  
+        <ul class="mebar">  
+            <li><a href="load10.html">Accueil</a></li>  
+            <li><a href="load9.html">Enregistrement Finaliste</a></li>  
+            <li><a href="load19.html">Enregistrement Élève</a></li>  
+            <li class="active"><a href="info.html">Infos</a></li>   
+        </ul>  
+    </header>  
+    <br>  
+
+    <div class="wrapper">  
+        <h2>Informations : Finalistes & Élèves</h2>  
+        <form>  
+            <!-- Account Information Start -->  
+            <br>  
+            <br>  
+            <div>  
+                <p class="flagged">1. Voir toutes les informations liées aux Finalistes.</p>   
+            </div>     
+            <div class="input_group">  
+                <div class="input_box3">  
+                    <button id="convertBtn" type="button">INFOS FINALISTES</button>  
+                </div>  
+            </div>  
+            <br>  
+            <br>  
+            <div>  
+                <p class="flagged">2. Voir toutes les informations liées aux Élèves.</p>   
+            </div>   
+            <div class="input_group">  
+                <div class="input_box3">  
+                    <button id="convertBtn1" type="button">INFOS ELEVES</button>                    
+                </div>  
+            </div>  
+            <br>  
+            <br>  
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
+            <script>
+                document.getElementById('convertBtn').addEventListener('click', async () => {  
+        // Demande à l'utilisateur de sélectionner un fichier JSON  
+        const [fileHandle] = await window.showOpenFilePicker({  
+            types: [{  
+                description: 'Fichiers JSON',  
+                accept: { 'application/json': ['.json'] },  
+            }],  
+        });  
+
+        // Lire le contenu du fichier  
+        const file = await fileHandle.getFile();  
+        const fileContents = await file.text();  
+
+        // Convertir le JSON en tableau d'objets  
+        const jsonData = JSON.parse(fileContents);  
+
+        // Créer une feuille de calcul à partir des données JSON  
+        const worksheet = XLSX.utils.json_to_sheet(jsonData);  
+
+        // Créer un classeur et y ajouter la feuille  
+        const workbook = XLSX.utils.book_new();  
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'Données Finalistes');  
+
+        // Générer un fichier Excel et le télécharger  
+        XLSX.writeFile(workbook, 'Données_Finalistes.xlsx');  
+    }); 
+            </script>
+            <script>
+                document.getElementById('convertBtn1').addEventListener('click', async () => {  
+        // Demande à l'utilisateur de sélectionner un fichier JSON  
+        const [fileHandle] = await window.showOpenFilePicker({  
+            types: [{  
+                description: 'Fichiers JSON',  
+                accept: { 'application/json': ['.json'] },  
+            }],  
+        });  
+
+        // Lire le contenu du fichier  
+        const file = await fileHandle.getFile();  
+        const fileContents = await file.text();  
+
+        // Convertir le JSON en tableau d'objets  
+        const jsonData = JSON.parse(fileContents);  
+
+        // Créer une feuille de calcul à partir des données JSON  
+        const worksheet = XLSX.utils.json_to_sheet(jsonData);  
+
+        // Créer un classeur et y ajouter la feuille  
+        const workbook = XLSX.utils.book_new();  
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'Données Elèves');  
+
+        // Générer un fichier Excel et le télécharger  
+        XLSX.writeFile(workbook, 'Données_Elèves.xlsx');  
+    }); 
+            </script>
+        </form>
+    </div>
+</body>  
+
+</html>

@@ -1,0 +1,213 @@
+<!DOCTYPE html>  
+<html lang="en">  
+
+<head>  
+    <meta charset="UTF-8">  
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">  
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">  
+    <title>Enregistrement Finaliste - Gestion Finalistes</title>  
+    <link rel="stylesheet" href="stylesheet.css">  
+    <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css">  
+    <link rel="icon" href="favicon2.ico">  
+</head>  
+
+<body id="payment">  
+    <header>  
+        <div class="logo">  
+            <p>Gestion Finalistes |<span>| Inspection BARAKA</span></p>  
+        </div>  
+        <ul class="mebar">  
+            <li><a href="load10.html">Accueil</a></li>  
+            <li><a href="load9.html">Enregistrement Finaliste</a></li>  
+            <li class="active"><a href="student.html">Enregistrement Elève</a></li>  
+            <li><a href="load23.html">Infos</a></li>   
+        </ul>  
+    </header>  
+
+    <div class="wrapper">  
+        <h2>Enregistrement : Elève</h2>  
+        <form id="paymentform" onsubmit="saveData(event)"> 
+          <br> 
+            <h4>Informations :</h4>  
+            <div class="input_group">  
+                <div class="input_box">  
+                    <input type="text" id="NomComplet" placeholder="Nom et Post-nom" required class="name">  
+                    <i class="fa fa-user icon"></i>  
+                </div>  
+                <div class="input_box">  
+                    <input type="text" id="AutreNom" placeholder="Prénom" class="name">  
+                    <i class="fa fa-user icon"></i>  
+                </div>  
+            </div>  
+            <div class="input_group">  
+                <div class="input_box">  
+                    <input type="text" id="option" placeholder="Option" required class="name">  
+                    <i class="fa fa-envelope icon"></i>  
+                </div>  
+            </div>  
+            <div class="input_group">  
+                <div class="input_box">  
+                    <input type="text" id="adresse" placeholder="Adresse de Résidence" required class="name">  
+                    <i class="fa fa-map-marker icon" aria-hidden="true"></i>  
+                </div>  
+            </div>  
+            <div class="input_group">  
+                <div class="input_box">  
+                    <input type="text" id="classe" placeholder="Classe actuelle" required class="name">  
+                    <i class="fa fa-institution icon"></i>  
+                </div>  
+            </div>  
+            <div class="input_group">  
+                <div class="input_box">  
+                    <input type="text" id="ville" placeholder="Ville" required class="name">  
+                    <i class="fa fa-institution icon"></i>  
+                </div>  
+            </div>  
+            <div class="input_group">  
+                <div class="input_box">  
+                    <input type="text" id="Ecole" placeholder="Nom de l'école" required class="name">  
+                    <i class="fa fa-institution icon"></i>  
+                </div>  
+            </div>  
+            <div class="input_group">  
+                <div class="input_box">  
+                    <input type="text" id="LieuNaissance" placeholder="Lieu de naissance" required class="name">  
+                    <i class="fa fa-institution icon"></i>  
+                </div>  
+            </div>  
+            <div class="input_group">  
+                <div class="input_box">  
+                    <input type="text" id="Tuteur" placeholder="Nom du père ou tuteur" required class="name">  
+                    <i class="fa fa-institution icon"></i>  
+                </div>  
+            </div>  
+            <div class="input_group">  
+                <div class="input_box">  
+                    <input type="text" id="Tutrice" placeholder="Nom de la mère ou tutrice" required class="name">  
+                    <i class="fa fa-institution icon"></i>  
+                </div>  
+            </div>  
+            <div class="input_group">  
+                <div class="input_box">  
+                    <h4>Date de naissance</h4>  
+                    <input type="text" id="DateNaissance" placeholder="Jour - Mois - Année (lettres et chiffres)" required class="name">  
+                </div>  
+                <div class="input_box">  
+                    <h4>Sexe</h4>  
+                    <input type="radio" name="gender" value="Homme" class="radio" id="b1" checked>  
+                    <label for="b1">Homme</label>  
+                    <input type="radio" name="gender" value="Femme" class="radio" id="b2">  
+                    <label for="b2">Femme</label>  
+                </div>  
+            </div>  
+            <div class="input_group">  
+                <div class="input_box">  
+                    <input type="tel" id="Matricule" placeholder="Numéro matricule (si disponible)" required class="name">  
+                    <i class="fa fa-credit-card icon"></i>  
+                </div>  
+            </div>  
+            <div class="input_box">  
+                <input type="text" id="AnnéeScolaire" placeholder="Année scolaire" required class="name">  
+                <i class="fa fa-money icon" aria-hidden="true"></i>  
+            </div>  
+            <br>
+            <br>
+            <div class="inspection">  
+                <label>  
+                    <input type="checkbox"> En cochant cette case, vous reconnaissez avoir enregistré l'élève ci-haut en toute et due forme et que toutes les informations fournies sont correctes et exactes.</label>  
+            </div>  
+            <br>  
+            <div class="input_group">  
+                <div class="input_box">  
+                    <button type="submit">ENREGISTRER</button>  
+                </div>  
+            </div>  
+        </form>  
+    </div>  
+
+    <script>  
+        let fileHandle = null; // To store the opened file handle
+
+        // Function to decrypt data  
+        async function decryptData(encryptedData, iv) {  
+            const decryptedData = await window.crypto.subtle.decrypt(  
+                {  
+                    name: "AES-GCM",  
+                    iv: Uint8Array.from(iv), // Convert back to Uint8Array  
+                },  
+                await getEncryptionKey(), // Get the key again  
+                new Uint8Array(encryptedData) // Pass the encrypted data  
+            );  
+            return JSON.parse(new TextDecoder().decode(decryptedData)); // Convert decrypted data back to JSON  
+        }  
+
+        async function saveData(event) {  
+            event.preventDefault(); // Prevent form submission  
+            
+            // Collect data from the form  
+            const newData = {  
+                NomComplet: document.getElementById('NomComplet').value,  
+                AutreNom: document.getElementById('AutreNom').value,  
+                Option: document.getElementById('option').value,  
+                Adresse: document.getElementById('adresse').value,  
+                Classe: document.getElementById('classe').value,  
+                Ville: document.getElementById('ville').value,  
+                Ecole: document.getElementById('Ecole').value,  
+                LieuNaissance: document.getElementById('LieuNaissance').value,  
+                Tuteur: document.getElementById('Tuteur').value,  
+                Tutrice: document.getElementById('Tutrice').value,  
+                DateNaissance: document.getElementById('DateNaissance').value,  
+                Genre: document.querySelector('input[name="gender"]:checked').value,  
+                Matricule: document.getElementById('Matricule').value,  
+                AnnéeScolaire: document.getElementById('AnnéeScolaire').value  
+            };  
+
+            try {  
+                // Open file picker if no file is selected yet  
+                if (!fileHandle) {  
+                    [fileHandle] = await window.showOpenFilePicker({  
+                        types: [{  
+                            description: 'JSON Files',  
+                            accept: { 'application/json': ['.json'] },  
+                        }],  
+                    });  
+                }  
+
+                // Read the existing file content  
+                const file = await fileHandle.getFile();  
+                const fileContents = await file.text();  
+                const existingData = JSON.parse(fileContents || '[]'); // Parse existing data or default to empty array  
+
+                // Check for duplicate entry based on fullName  
+                const duplicateEntry = existingData.find(entry => entry.NomComplet === newData.NomComplet && entry.Classe === newData.Classe && entry.Option === newData.Option && entry.Adresse === newData.Adresse && entry.LieuNaissance === newData.LieuNaissance && entry.DateNaissance === newData.DateNaissance && entry.Genre === newData.Genre);  
+                
+                if (duplicateEntry) {  
+                    alert('⚠️Alerte : Cet(te) élèvé existe déjà dans la base de données.');  
+                    return; // Exit the function if a duplicate is found  
+                }  
+
+                // Append new data  
+                existingData.push(newData);  
+
+                // Convert updated data back to JSON  
+                const binaryData = new TextEncoder().encode(JSON.stringify(existingData, null, 2));  
+
+                // Create a writable stream to the file  
+                const writableStream = await fileHandle.createWritable();  
+                
+                // Write the updated data to the file  
+                await writableStream.write(binaryData);  
+                
+                // Close the stream  
+                await writableStream.close();  
+
+                alert('Données enregistrées avec succès !');  
+            } catch (error) {  
+                console.error('Erreur lors de la manipulation du fichier:', error);  
+                alert('Erreur lors de la sauvegarde du fichier: ' + error.message);  
+            }  
+        } 
+    </script>  
+</body>  
+
+</html>
